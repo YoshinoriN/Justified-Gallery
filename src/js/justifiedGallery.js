@@ -835,59 +835,54 @@ JustifiedGallery.prototype.init = function () {
 
     $entry.addClass('jg-entry');
 
-    if ($entry.data('jg.loaded') !== true && $entry.data('jg.loaded') !== 'skipped') {
+    // Link Rel global overwrite
+    if (that.settings.rel !== null) $entry.attr('rel', that.settings.rel);
 
-      // Link Rel global overwrite
-      if (that.settings.rel !== null) $entry.attr('rel', that.settings.rel);
+    // Link Target global overwrite
+    if (that.settings.target !== null) $entry.attr('target', that.settings.target);
 
-      // Link Target global overwrite
-      if (that.settings.target !== null) $entry.attr('target', that.settings.target);
+    if ($image !== null) {
 
-      if ($image !== null) {
+      // Image src
+      var imageSrc = that.extractImgSrcFromImage($image);
+      $image.attr('src', imageSrc);
 
-        // Image src
-        var imageSrc = that.extractImgSrcFromImage($image);
-        $image.attr('src', imageSrc);
-
-        /* If we have the height and the width, we don't wait that the image is loaded, but we start directly
-         * with the justification */
-        if (that.settings.waitThumbnailsLoad === false) {
-          var width = parseFloat($image.prop('width'));
-          var height = parseFloat($image.prop('height'));
-          if (!isNaN(width) && !isNaN(height)) {
-            $entry.data('jg.width', width);
-            $entry.data('jg.height', height);
-            $entry.data('jg.loaded', 'skipped');
-            skippedImages = true;
-            that.startImgAnalyzer(false);
-            return true; // continue
-          }
+      /* If we have the height and the width, we don't wait that the image is loaded, but we start directly
+        * with the justification */
+      if (that.settings.waitThumbnailsLoad === false) {
+        var width = parseFloat($image.prop('width'));
+        var height = parseFloat($image.prop('height'));
+        if (!isNaN(width) && !isNaN(height)) {
+          $entry.data('jg.width', width);
+          $entry.data('jg.height', height);
+          $entry.data('jg.loaded', 'skipped');
+          skippedImages = true;
+          that.startImgAnalyzer(false);
+          return true; // continue
         }
-
-        $entry.data('jg.loaded', false);
-        imagesToLoad = true;
-
-        // Spinner start
-        if (!that.isSpinnerActive()) that.startLoadingSpinnerAnimation();
-
-        that.onImageEvent(imageSrc, function (loadImg) { // image loaded
-          $entry.data('jg.width', loadImg.width);
-          $entry.data('jg.height', loadImg.height);
-          $entry.data('jg.loaded', true);
-          that.startImgAnalyzer(false);
-        }, function () { // image load error
-          $entry.data('jg.loaded', 'error');
-          that.startImgAnalyzer(false);
-        });
-
-      } else {
-        $entry.data('jg.loaded', true);
-        $entry.data('jg.width', $entry.width() | parseFloat($entry.css('width')) | 1);
-        $entry.data('jg.height', $entry.height() | parseFloat($entry.css('height')) | 1);
       }
 
-    }
+      $entry.data('jg.loaded', false);
+      imagesToLoad = true;
 
+      // Spinner start
+      if (!that.isSpinnerActive()) that.startLoadingSpinnerAnimation();
+
+      that.onImageEvent(imageSrc, function (loadImg) { // image loaded
+        $entry.data('jg.width', loadImg.width);
+        $entry.data('jg.height', loadImg.height);
+        $entry.data('jg.loaded', true);
+        that.startImgAnalyzer(false);
+      }, function () { // image load error
+        $entry.data('jg.loaded', 'error');
+        that.startImgAnalyzer(false);
+      });
+
+    } else {
+      $entry.data('jg.loaded', true);
+      $entry.data('jg.width', $entry.width() | parseFloat($entry.css('width')) | 1);
+      $entry.data('jg.height', $entry.height() | parseFloat($entry.css('height')) | 1);
+    }
   });
 
   if (!imagesToLoad && !skippedImages) this.startImgAnalyzer(false);
